@@ -2,40 +2,54 @@ import os
 from PIL import Image
   
 
-directory = '/Input/Image/Directory/Path/'
-store_pad_dir='/Output/Image/Directory/Path/'
-rot_pad_dir='/Rotated/Image/Directory/Path/'
+directory = '/FilePath/Test Images/'
+store_pad_dir='/FilePath/Output Images/'
+rot_pad_dir='/FilePath/Rotated Images/'
 
 
 
 # Normal image padding value (no rotation)
-right = 200
-left = 200
-top = 100
-bottom = 100
+right = 10
+left = 10
+top = 10
+bottom = 10
 
-# Rotated image padding value
-rot_right=150
-rot_left=150
-rot_top=50
-rot_bottom=50
+# Rotated image padding value - 70 for android iOS - right-1000, left-1000, top-120, bottom-120
+#ios
+rot_right=1000
+rot_left=1000
+rot_top=120
+rot_bottom=120
+
+#android
+# rot_right=70
+# rot_left=70
+# rot_top=70
+# rot_bottom=70
 
 # Deg to be rotated (multiples of 90 only)
-deg_to_rotate=270
+# deg_to_rotate=90 
+deg_to_rotate=90
+
+#270 for android and 90 for iOS
 
 
 for filename in os.listdir(directory):
     # Open the image
     im = Image.open(directory + filename)
-    width, height = im.size
+    resized_image = im.resize((1474, 1058)) #resizing all images to have uniform padding - this was the ideal image size based on the findings from multiple iteration
+    #(1474, 1058), (1080, 920)
+    resized_image.save(directory + filename)
+
+    width, height = resized_image.size
     new_width = width + right + left
     new_height = height + top + bottom
     
 
     
     # Add the padding
-    result = Image.new(im.mode, (new_width, new_height), (255, 255, 255))
-    result.paste(im, (left,top))
+    result = Image.new(resized_image.mode, (new_width, new_height), (255, 255, 255))
+    result.paste(resized_image, (left,top))
     
     # Save the padded image as JPG
     result.save(store_pad_dir + filename.split(".")[0] + "_padded.png", "PNG")
@@ -44,7 +58,7 @@ for filename in os.listdir(directory):
     rot_vals = {0: None, 90: Image.ROTATE_90, 180: Image.ROTATE_180,
                     270: Image.ROTATE_270, 360:None}
 
-    rotated_image = im.transpose(rot_vals[deg_to_rotate])
+    rotated_image = resized_image.transpose(rot_vals[deg_to_rotate])
 
     # Add Padding to rotated image
     rot_width, rot_height = rotated_image.size
@@ -55,5 +69,3 @@ for filename in os.listdir(directory):
 
     #Save rotated and padded image
     rot_result.save(rot_pad_dir + filename.split(".")[0] + "_rot_padded.png", "PNG")
-
-    
